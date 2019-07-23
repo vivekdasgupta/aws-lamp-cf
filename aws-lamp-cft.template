@@ -340,7 +340,56 @@
              "         --region ", { "Ref" : "AWS::Region" }, "\n"
         ]]}}
       }
+    },
+
+    "WebServerSecurityGroup" : {
+      "Type" : "AWS::EC2::SecurityGroup",
+      "Properties" : {
+        "GroupDescription" : "Enable HTTP access via port 80 locked down to the ELB and SSH access",
+        "SecurityGroupIngress" : [ {
+          "IpProtocol" : "tcp",
+          "FromPort" : "80",
+          "ToPort" : "80",
+          "SourceSecurityGroupId" : {"Fn::Select" : [0, {"Fn::GetAtt" : ["ApplicationLoadBalancer", "SecurityGroups"]}]}
+        },
+        {
+          "IpProtocol" : "tcp",
+          "FromPort" : "22",
+          "ToPort" : "22",
+          "CidrIp" : { "Ref" : "SSHLocation"}
+        } ],
+        "VpcId" : { "Ref" : "VpcId" }
+      }
+    },
+
+    "DBEC2SecurityGroup": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties" : {
+        "GroupDescription": "Open database for access",
+        "SecurityGroupIngress" : [{
+        "IpProtocol" : "tcp",
+        "FromPort" : "3306",
+        "ToPort" : "3306",
+        "SourceSecurityGroupId" : { "Ref" : "WebServerSecurityGroup" }
+        }],
+        "VpcId" : { "Ref" : "VpcId" }
+      }
+    },
+
+    "MySQLDatabase": {
+      "Type": "AWS::RDS::DBInstance",
+      "Properties": {
+        "Engine" : "MySQL",
+        "DBName" : { "Ref": "DBName" },
+        "MultiAZ" : { "Ref": "MultiAZDatabase" },
+        "MasterUsername": { "Ref": "DBUser" },
+        "MasterUserPassword": { "Ref" : "DBPassword" },
+        "DBInstanceClass": { "Ref" : "DBInstanceClass" },
+        "AllocatedStorage": { "Ref" : "DBAllocatedStorage" },
+        "VPCSecurityGroups": [ { "Fn::GetAtt": [ "DBEC2SecurityGroup", "GroupId" ] } ]
+      }
     }
+  }
 
 
 
