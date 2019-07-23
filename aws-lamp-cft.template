@@ -133,4 +133,72 @@
 
   },
 
+
+  "Resources" : {
+
+    "ApplicationLoadBalancer" : {
+      "Type" : "AWS::ElasticLoadBalancingV2::LoadBalancer",
+      "Properties" : {
+        "Subnets" : { "Ref" : "Subnets"}
+      }
+    },
+
+    "ALBListener" : {
+      "Type" : "AWS::ElasticLoadBalancingV2::Listener",
+      "Properties" : {
+        "DefaultActions" : [{
+          "Type" : "forward",
+          "TargetGroupArn" : { "Ref" : "ALBTargetGroup" }
+        }],
+        "LoadBalancerArn" : { "Ref" : "ApplicationLoadBalancer" },
+        "Port" : "80",
+        "Protocol" : "HTTP"
+      }
+    },
+
+    "ALBTargetGroup" : {
+      "Type" : "AWS::ElasticLoadBalancingV2::TargetGroup",
+      "Properties" : {
+        "HealthCheckIntervalSeconds" : 10,
+        "HealthCheckTimeoutSeconds" : 5,
+        "HealthyThresholdCount" : 2,
+        "Port" : 80,
+        "Protocol" : "HTTP",
+        "UnhealthyThresholdCount" : 5,
+        "VpcId" : {"Ref" : "VpcId"},
+        "TargetGroupAttributes" :
+          [ { "Key" : "stickiness.enabled", "Value" : "true" },
+            { "Key" : "stickiness.type", "Value" : "lb_cookie" },
+            { "Key" : "stickiness.lb_cookie.duration_seconds", "Value" : "30" }
+        ]
+      }
+    },
+
+    "WebServerGroup" : {
+      "Type" : "AWS::AutoScaling::AutoScalingGroup",
+      "Properties" : {
+        "VPCZoneIdentifier" : { "Ref" : "Subnets" },
+        "LaunchConfigurationName" : { "Ref" : "LaunchConfig" },
+        "MinSize" : "1",
+        "MaxSize" : "5",
+        "DesiredCapacity" : { "Ref" : "WebServerCapacity" },
+        "TargetGroupARNs" : [ { "Ref" : "ALBTargetGroup" } ]
+      },
+      "CreationPolicy" : {
+        "ResourceSignal" : {
+          "Timeout" : "PT5M",
+          "Count"   : { "Ref" : "WebServerCapacity" }
+        }
+      },
+      "UpdatePolicy": {
+        "AutoScalingRollingUpdate": {
+          "MinInstancesInService": "1",
+          "MaxBatchSize": "1",
+          "PauseTime" : "PT15M",
+          "WaitOnResourceSignals": "true"
+        }
+      }
+    }
+
+
 }
