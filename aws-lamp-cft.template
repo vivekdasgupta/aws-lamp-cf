@@ -180,7 +180,7 @@
         "VPCZoneIdentifier" : { "Ref" : "Subnets" },
         "LaunchConfigurationName" : { "Ref" : "LaunchConfig" },
         "MinSize" : "1",
-        "MaxSize" : "5",
+        "MaxSize" : "4",
         "DesiredCapacity" : { "Ref" : "WebServerCapacity" },
         "TargetGroupARNs" : [ { "Ref" : "ALBTargetGroup" } ]
       },
