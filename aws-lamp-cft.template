@@ -389,8 +389,13 @@
         "VPCSecurityGroups": [ { "Fn::GetAtt": [ "DBEC2SecurityGroup", "GroupId" ] } ]
       }
     }
+  },
+
+  "Outputs" : {
+    "WebsiteURL" : {
+      "Description" : "URL for LAMP stack",
+      "Value" : { "Fn::Join" : ["", ["http://", { "Fn::GetAtt" : [ "ApplicationLoadBalancer", "DNSName" ]}]] }
+    }
   }
-
-
 
 }
