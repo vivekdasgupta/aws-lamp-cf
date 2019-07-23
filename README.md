@@ -1,1 +1,1 @@
-# aws-lamp-cf
+# AWS Cloudformation template for LAMP Stack
