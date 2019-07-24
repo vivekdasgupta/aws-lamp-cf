@@ -20,7 +20,7 @@
   The AWS RDS (MySQL) will also be a multi-AZ database, hence redundant.
 
 
-#Security
+# Security
 
   Security groups will limit access to instances and the load balancers.  The load balancer will be available publicly over internet, but will be accessible only on port 80. The instances will be reachable on port 80 via this load balancer only. The instances will also allow access on port 22 (SSH) for any maintenance/troubleshooting. The CIDR for internet access is a param for this CF stack and can be restricted to appropriate range for security.   MySQL database will only allow connection on port 3306 from the instances.
 
